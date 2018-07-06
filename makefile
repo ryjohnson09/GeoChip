@@ -34,3 +34,30 @@ data/processed/TrEAT_Clinical_Metadata_tidy.csv : data/processed/Merged_Geochip.
 				                  data/raw/IDCRP_Glomics_Subject_ID_List_11-21-17.xlsx\
 				                  code/Create_Clin_Metadata.R
 	R -e "source('code/Create_Clin_Metadata.R')"
+
+
+##################
+### Ordination ###
+##################
+
+# Run Detrended Coordinate Analysis on Merged GeoChip Data
+# Depends on:	data/processed/Merged_Geochip.tsv
+#		code/DCA_Geochip.R
+# Produces:	data/processed/GeoChip_DCA.csv
+data/processed/GeoChip_DCA.csv : data/processed/Merged_Geochip.tsv\
+				 code/DCA_Geochip.R
+	R -e "source('code/DCA_Geochip.R')"
+
+
+# Plot DCA Analysis on Merged GeoChip Data
+# Depends on:	data/raw/IDCRP_Glomics_Subject_ID_List_11-21-17.xlsx
+#		data/processed/GeoChip_DCA.csv
+#		data/processed/TrEAT_Clinical_Metadata_tidy.csv
+#		code/Plot_DCA_GeoChip.R
+# Produces: 	results/figures/DCA_GeoChip_TreatmentGroup.pdf
+#		results/figures/DCA_GeoChip_VisitNumber.pdf
+results/figures/DCA_GeoChip_TreatmentGroup.pdf results/figures/DCA_GeoChip_VisitNumber.pdf : data/raw/IDCRP_Glomics_Subject_ID_List_11-21-17.xlsx\
+											     data/processed/GeoChip_DCA.csv\
+											     data/processed/TrEAT_Clinical_Metadata_tidy.csv\
+											     code/Plot_DCA_GeoChip.R
+	R -e "source('code/Plot_DCA_GeoChip.R')"

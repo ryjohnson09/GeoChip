@@ -14,10 +14,10 @@ library(readxl)
 ## Read in TrEAT and Clean ----------------------------------------------
 
 # Read in TrEAT DB
-treat <- read_excel("../data/raw/TrEAT_Merge_2018.06.27.XLSX")
+treat <- read_excel("data/raw/TrEAT_Merge_2018.06.27.XLSX")
 
 # Import data that explains treat column names
-treat_explain <- read_excel("../data/raw/TrEAT_Merge_DataDictionary_2018.06.27.XLSX")
+treat_explain <- read_excel("data/raw/TrEAT_Merge_DataDictionary_2018.06.27.XLSX")
 
 # Remove spaces from truncated study ID
 treat_explain <- treat_explain %>% 
@@ -46,13 +46,13 @@ rm(treat_explain, foo)
 ## Import Merged GeoChip data -----------------------------
 
 # Read in merged Geochip data (just first instance, only need column names)
-geochip_samples <- read_tsv("../data/processed/Merged_Geochip.tsv", n_max = 1)
+geochip_samples <- read_tsv("data/processed/Merged_Geochip.tsv", n_max = 1)
 
 
 ## Import Glomics ID decoder list --------------------------------------
 
 # Read in the ID list
-ID_list <- read_excel("../data/raw/IDCRP_Glomics_Subject_ID_List_11-21-17.xlsx") %>%
+ID_list <- read_excel("data/raw/IDCRP_Glomics_Subject_ID_List_11-21-17.xlsx") %>%
   select_if(~ !all(is.na(.)))
 
 glomics_ID <- unlist(select(ID_list, starts_with("X")), # stack all glomics ID values
@@ -207,5 +207,5 @@ treat_geochip_clin <- treat_geochip_clin %>%
 
 
 ## Write to processed data ---------------------------------
-write_csv(treat_geochip_clin, "../data/processed/TrEAT_Clinical_Metadata_tidy.csv")
+write_csv(treat_geochip_clin, "data/processed/TrEAT_Clinical_Metadata_tidy.csv")
 
