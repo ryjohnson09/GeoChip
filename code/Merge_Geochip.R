@@ -22,11 +22,16 @@ merge_geochip <- function(Geochip){
     if(is_empty(geochip_data)){
       
       # Read in gchip
-      geochip_data <- read_tsv(gchip)
+      geochip_data <- read_tsv(gchip, guess_max = 100000) %>%
+        select(`Genbank ID`, Gene, Organism, Gene_category, 
+               Subcategory1, Subcategory2, Lineage, contains("[Xx]\\d{1,3}"))
     } else {
       
       # Read in gchip and merge into geochip_data
-      x <-  read_tsv(gchip)
+      x <-  read_tsv(gchip, guess_max = 100000) %>%
+        select(`Genbank ID`, Gene, Organism, Gene_category, 
+               Subcategory1, Subcategory2, Lineage, contains("[Xx]\\d{1,3}"))
+      
       geochip_data <- full_join(geochip_data, x, 
                                 by = c("Genbank ID", "Gene", "Organism", "Gene_category", 
                                        "Subcategory1", "Subcategory2", "Lineage"))
