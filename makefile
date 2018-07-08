@@ -41,6 +41,19 @@ data/processed/Merged_Geochip.tsv : data/raw/GeoChip_New/GeoChip-1-LTO.txt\
 	R -e "source('code/Merge_Geochip.R'); merge_geochip(c('data/raw/GeoChip_New/GeoChip-1-LTO.txt','data/raw/GeoChip_New/GeoChip-2-LTO.txt','data/raw/GeoChip_New/GeoChip-3-LTO.txt','data/raw/GeoChip_New/GeoChip-4-LTO.txt','data/raw/GeoChip_New/GeoChip-5-LTO.txt','data/raw/GeoChip_New/GeoChip-6-LTO.txt','data/raw/GeoChip_New/GeoChip-7-LTO.txt','data/raw/GeoChip_New/GeoChip-8-LTO.txt'))"
 
 
+
+# Make the Merged Geochip data long/tidy
+# Depends on:	data/processed/Merged_Geochip.tsv
+#		data/processed/ID_Decoder.csv
+#		code/Merged_Geochip_Tidy.R
+# Produces:	data/processed/Merged_Geochip_Tidy.tsv
+data/processed/Merged_Geochip_Tidy.tsv : data/processed/Merged_Geochip.tsv\
+			                 data/processed/ID_Decoder.csv\
+			                 code/Merged_Geochip_Tidy.R
+	R -e "source('code/Merged_Geochip_Tidy.R')"
+
+
+
 # Create Clinical Metadata Table Extracted from TrEAT DB
 # Depends on:	data/processed/Merged_Geochip.tsv
 #		data/raw/TrEAT_Merge_2018.06.27.XLSX
