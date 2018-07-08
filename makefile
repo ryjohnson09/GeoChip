@@ -7,7 +7,13 @@ list:
 
 
 
-
+# Create decoder that links Glomics ID's to TrEAT Subject IDs
+# Depends on:	data/raw/IDCRP_Glomics_Subject_ID_List_11-21-17.xlsx
+#		code/ID_Decoder.R
+# Produces:	data/processed/ID_Decoder.csv
+data/processed/ID_Decoder.csv : data/raw/IDCRP_Glomics_Subject_ID_List_11-21-17.xlsx\
+				code/ID_Decoder.R
+	R -e "source('code/ID_Decoder.R')"
 
 
 
