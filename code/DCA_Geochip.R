@@ -19,7 +19,7 @@ geochip1 <- readr::read_tsv("data/processed/Merged_Geochip.tsv", progress = TRUE
 
 # Remove descriptive columns (leaving only samples)
 geochip1 <- geochip1 %>%
-  select(-`Genbank ID`, -Gene, -Organism, -Gene_category, 
+  select(-Genbank.ID, -Gene, -Organism, -Gene_category, 
          -Subcategory1, -Subcategory2, -Lineage, -X10) # X10 was removed from study
 
 # Set NA's to 0

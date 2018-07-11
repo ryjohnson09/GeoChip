@@ -11,18 +11,11 @@ library(tidyverse)
 # Read in merged Geochip Data
 geochip <- read_tsv("data/processed/Merged_Geochip.tsv", guess_max = 100000)
 
-# Remove Duplicates ****MAY NEED TO BE CHANGED*******
-geochip <- geochip %>%
-  select(-X85, -X101, -X193)
-colnames(geochip) <- str_replace(string = colnames(geochip), 
-                                 pattern = "_1", 
-                                 replacement = "")
-
 # Make long/tidy
 geochip_long <- geochip %>%
   gather(key = glomics_ID, 
          value = Signal, 
-         colnames(.[8:ncol(.)]), -`Genbank ID`, -Gene,
+         colnames(.[8:ncol(.)]), -Genbank.ID, -Gene,
          -Organism, -Gene_category, -Subcategory1, 
          -Subcategory2, -Lineage)
 

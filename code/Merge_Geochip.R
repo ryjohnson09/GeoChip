@@ -48,6 +48,36 @@ merge_geochip <- function(Geochip){
                                         pattern = "^x",
                                         replacement = "X")
   
+  # Ensure Gene categories are labeled correctly (fix capitalization)
+  geochip_data$Gene_category <- gsub(pattern = "secondary metabolism", 
+                                     replacement = "Secondary metabolism", 
+                                     geochip_data$Gene_category)
+  
+  geochip_data$Gene_category <- gsub(pattern = "virus", 
+                                     replacement = "Virus", 
+                                     geochip_data$Gene_category)
+  
+  geochip_data$Gene_category <- gsub(pattern = "virulence", 
+                                     replacement = "Virulence", 
+                                     geochip_data$Gene_category)
+  
+  # Check for duplicates and make unique
+  geochip_data <- geochip_data %>%
+    setNames(make.names(names(.), unique = TRUE))
+  
+  
+  #!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#
+  # Remove Duplicates ****MAY NEED TO BE CHANGED******* 
+   geochip_data <- geochip_data %>%
+     select(-X85, -X101, -X193)
+   
+   colnames(geochip_data) <- str_replace(string = colnames(geochip_data), 
+                                    pattern = "\\.1", 
+                                    replacement = "")
+   #!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#
+  
+  
+  
   # Return compiled data frame
   write_tsv(geochip_data, "data/processed/Merged_Geochip.tsv")
 }
