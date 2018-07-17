@@ -83,6 +83,7 @@ results/figures/Geochip_Functional_Gene_Abundance.png : data/processed/Merged_Ge
 
 
 
+
 # Plot the Relative Abundance of Functional Gene Categories by visit number
 # Depends on:	data/processed/Merged_Geochip_Tidy.tsv
 #               code/Functional_Category_Visit_Number.R
@@ -90,6 +91,34 @@ results/figures/Geochip_Functional_Gene_Abundance.png : data/processed/Merged_Ge
 results/figures/Geochip_Functional_Gene_Abundance_Visit_Number.png : data/processed/Merged_Geochip_Tidy.tsv\
 								     code/Functional_Category_Visit_Number.R
 	R -e "source('code/Functional_Category_Visit_Number.R', echo=T)"
+
+
+
+
+
+
+# Create table that shows change in gene relative signal intensity between visits 1 and 4/5
+# Depends on:	data/processed/Merged_Geochip_Tidy.tsv
+#               code/Geochip_Visit_Gene_Diff.R
+# Produces:	data/processed/Geochip_Visit_Gene_Diff.tsv
+data/processed/Geochip_Visit_Gene_Diff.tsv : data/processed/Merged_Geochip_Tidy.tsv\
+			                     code/Geochip_Visit_Gene_Diff.R
+	R -e "source('code/Geochip_Visit_Gene_Diff.R', echo=T)"
+
+
+
+
+
+
+# Geochip Response Ratios for Gene Categories based on Visit Number
+# Depends on:	data/processed/Merged_Geochip.tsv
+# 	     	code/Geochip_ResRatio_Visit.R
+# Produces:	results/figures/Geochip_RespRatio_Visit.png
+results/figures/Geochip_RespRatio_Visit.png : data/processed/Merged_Geochip.tsv\
+					      code/Geochip_ResRatio_Visit.R
+	R -e "source('code/Geochip_ResRatio_Visit.R', echo=T)"
+
+
 
 
 
