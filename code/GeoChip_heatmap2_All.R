@@ -10,6 +10,8 @@
 # ISSUES:
 #  1. Data structure is too large, running out of memory.
 #     Should try AWS, or data.table to compute dist manually
+#  2. Think about splitting up the number of samples in each/
+#     number of genes included.
 #!#!#!#!#!#!#!#!#!#!#!#!#!#
 
 library(tidyverse)
@@ -59,7 +61,9 @@ heatmap.2(as.matrix(geochip_df),
           breaks = colors, 
           labRow = FALSE,
           labCol = FALSE,
-          dendrogram = "col",
+          dendrogram = "none",
+          Rowv = FALSE,
+          Colv = FALSE,
           key = FALSE)
 
 dev.off()
