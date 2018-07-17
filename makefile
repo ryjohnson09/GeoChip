@@ -38,7 +38,7 @@ data/processed/Merged_Geochip.tsv : data/raw/GeoChip_New/GeoChip-1-LTO.txt\
 				    data/raw/GeoChip_New/GeoChip-7-LTO.txt\
 				    data/raw/GeoChip_New/GeoChip-8-LTO.txt\
 				    code/Merge_Geochip.R
-	R -e "source('code/Merge_Geochip.R'); merge_geochip(c('data/raw/GeoChip_New/GeoChip-1-LTO.txt','data/raw/GeoChip_New/GeoChip-2-LTO.txt','data/raw/GeoChip_New/GeoChip-3-LTO.txt','data/raw/GeoChip_New/GeoChip-4-LTO.txt','data/raw/GeoChip_New/GeoChip-5-LTO.txt','data/raw/GeoChip_New/GeoChip-6-LTO.txt','data/raw/GeoChip_New/GeoChip-7-LTO.txt','data/raw/GeoChip_New/GeoChip-8-LTO.txt'))"
+	R -e "source('code/Merge_Geochip.R', echo=T)"
 
 
 
@@ -52,6 +52,22 @@ data/processed/Merged_Geochip_Tidy.tsv : data/processed/Merged_Geochip.tsv\
 			                 code/Merged_Geochip_Tidy.R
 	R -e "source('code/Merged_Geochip_Tidy.R', echo=T)"
 
+
+
+
+# Create Clinical Metadata Table Extracted from TrEAT DB
+# Depends on:   data/processed/Merged_Geochip.tsv
+#               data/raw/TrEAT_Merge_2018.06.27.XLSX
+#               data/raw/TrEAT_Merge_DataDictionary_2018.06.27.XLSX
+#               data/raw/IDCRP_Glomics_Subject_ID_List_11-21-17.xlsx
+#               code/Create_Clin_Metadata.R
+# Produces:     data/processed/TrEAT_Clinical_Metadata_tidy.csv
+data/processed/TrEAT_Clinical_Metadata_tidy.csv : data/processed/Merged_Geochip.tsv\
+                                                  data/raw/TrEAT_Merge_2018.06.27.XLSX\
+                                                  data/raw/TrEAT_Merge_DataDictionary_2018.06.27.XLSX\
+                                                  data/raw/IDCRP_Glomics_Subject_ID_List_11-21-17.xlsx\
+                                                  code/Create_Clin_Metadata.R
+        R -e "source('code/Create_Clin_Metadata.R', echo=T)"
 
 
 
@@ -107,6 +123,9 @@ data/processed/Geochip_Visit_Gene_Diff.tsv : data/processed/Merged_Geochip_Tidy.
 
 
 
+#################################
+### Geochip Response Ratios #####
+#################################
 
 
 
@@ -120,23 +139,33 @@ results/figures/Geochip_RespRatio_Visit.png : data/processed/Merged_Geochip.tsv\
 
 
 
+# Geochip Response Ratios for Subcategory1 based on Visit Number
+# Depends on:   data/processed/Merged_Geochip.tsv
+#               code/Geochip_ResRatio_Visit_subcategory1.R
+# Produces:     results/figures/Geochip_RespRatio_Visit_subcategory1.png
+results/figures/Geochip_RespRatio_Visit_subcategory1.png : data/processed/Merged_Geochip.tsv\
+                                              		   code/Geochip_ResRatio_Visit_subcategory1.R
+        R -e "source('code/Geochip_ResRatio_Visit_subcategory1.R', echo=T)"
 
 
 
+# Geochip Response Ratios for Subcategory2 based on Visit Number
+# Depends on:   data/processed/Merged_Geochip.tsv
+#               code/Geochip_ResRatio_Visit_subcategory2.R
+# Produces:     results/figures/Geochip_RespRatio_Visit_subcategory2.png
+results/figures/Geochip_RespRatio_Visit_subcategory2.png : data/processed/Merged_Geochip.tsv\
+                                                           code/Geochip_ResRatio_Visit_subcategory2.R
+        R -e "source('code/Geochip_ResRatio_Visit_subcategory2.R', echo=T)"
 
-# Create Clinical Metadata Table Extracted from TrEAT DB
-# Depends on:	data/processed/Merged_Geochip.tsv
-#		data/raw/TrEAT_Merge_2018.06.27.XLSX
-#		data/raw/TrEAT_Merge_DataDictionary_2018.06.27.XLSX
-#		data/raw/IDCRP_Glomics_Subject_ID_List_11-21-17.xlsx
-#		code/Create_Clin_Metadata.R
-# Produces:	data/processed/TrEAT_Clinical_Metadata_tidy.csv
-data/processed/TrEAT_Clinical_Metadata_tidy.csv : data/processed/Merged_Geochip.tsv\
-				                  data/raw/TrEAT_Merge_2018.06.27.XLSX\
-				                  data/raw/TrEAT_Merge_DataDictionary_2018.06.27.XLSX\
-				                  data/raw/IDCRP_Glomics_Subject_ID_List_11-21-17.xlsx\
-				                  code/Create_Clin_Metadata.R
-	R -e "source('code/Create_Clin_Metadata.R', echo=T)"
+
+# Geochip Response Ratios for genes based on Visit Number
+# Depends on:   data/processed/Merged_Geochip.tsv
+#               code/Geochip_ResRatio_Visit_gene.R
+# Produces:     results/figures/Geochip_RespRatio_Visit_gene.png
+results/figures/Geochip_RespRatio_Visit_gene.png : data/processed/Merged_Geochip.tsv\
+                                                   code/Geochip_ResRatio_Visit_gene.R
+        R -e "source('code/Geochip_ResRatio_Visit_gene.R', echo=T)"
+
 
 
 ##################
@@ -164,3 +193,4 @@ results/figures/DCA_GeoChip_TreatmentGroup.png results/figures/DCA_GeoChip_Visit
 											     data/processed/TrEAT_Clinical_Metadata_tidy.csv\
 											     code/Plot_DCA_GeoChip.R
 	R -e "source('code/Plot_DCA_GeoChip.R', echo=T)"
+

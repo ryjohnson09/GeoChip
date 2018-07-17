@@ -1,5 +1,5 @@
 ###########################################################
-# Name: Geochip_ResRatio_Visit.R
+# Name: Geochip_ResRatio_Visit_subcategory1.R
 # Author: Ryan Johnson
 # Date Created: 16 July 2018
 # Purpose: Determine which genes are significantly altered
@@ -21,24 +21,24 @@ geochip_RR <- geochip %>%
   mutate(Signal_Relative_Abundance = (Signal / sum(Signal, na.rm = TRUE)* 100)) %>%
   
   # Remove columns not needed
-  select(-Gene, -Genbank.ID, -Subcategory1,  
+  select(-Gene, -Genbank.ID, -Gene_category,  
          -Signal, -Organism, -Subcategory2, -Lineage) %>%
   
-  # Remove any rows with NA in the signal category or Gene_category
+  # Remove any rows with NA in the signal category or Subcategory1
   filter(!is.na(Signal_Relative_Abundance)) %>%
-  filter(!is.na(Gene_category)) %>%
+  filter(!is.na(Subcategory1)) %>%
   
   # Calculate mead, sd, and counts (n)
-  group_by(Gene_category, glomics_ID, visit_number) %>%
-  summarise(Gene_category_relative_abundance = sum(Signal_Relative_Abundance, na.rm = TRUE)) %>%
-  group_by(Gene_category, visit_number) %>%
-  summarise(mean_signal = mean(Gene_category_relative_abundance),
-            sd_signal = sd(Gene_category_relative_abundance),
-            n = sum(!is.na(Gene_category_relative_abundance))) %>%
-
-
+  group_by(Subcategory1, glomics_ID, visit_number) %>%
+  summarise(Subcategory1_relative_abundance = sum(Signal_Relative_Abundance, na.rm = TRUE)) %>%
+  group_by(Subcategory1, visit_number) %>%
+  summarise(mean_signal = mean(Subcategory1_relative_abundance),
+            sd_signal = sd(Subcategory1_relative_abundance),
+            n = sum(!is.na(Subcategory1_relative_abundance))) %>%
+  
+  
   # Spread the signal mean by visit number
-  group_by(Gene_category) %>%
+  group_by(Subcategory1) %>%
   spread(visit_number, mean_signal) %>%
   
   # Rename visit mean columns
@@ -55,9 +55,9 @@ geochip_RR <- geochip %>%
   mutate(n_visit5 = ifelse(!is.na(Visit5_mean), n, NA)) %>%
   select(-sd_signal, -n) %>%
   
-
+  
   # Compress NAs
-  group_by(Gene_category) %>%
+  group_by(Subcategory1) %>%
   summarise_all(funs(sum(., na.rm = T))) %>%
   
   # Must have at least 10 observations in each subcategory
@@ -82,19 +82,25 @@ geochip_RR <- geochip %>%
   mutate(CI95_41 = abs(1.96 * SE_RR_41)) %>%
   mutate(CI95_51 = abs(1.96 * SE_RR_51))
 
+# Only include subcategories where the 95% CI does not overlap 0
+geochip_RR <- geochip_RR %>%
+  mutate(overlap_zero_41 = ifelse(0 > RR_41 - CI95_41 & 0 < RR_41 + CI95_41, TRUE, FALSE)) %>%
+  mutate(overlap_zero_51 = ifelse(0 > RR_51 - CI95_51 & 0 < RR_51 + CI95_51, TRUE, FALSE)) %>%
+  filter(overlap_zero_41 != TRUE | overlap_zero_51 != TRUE)
+
 
 # Plot
 geochip_RR_plot <- ggplot(data = arrange(geochip_RR, desc(RR_41))) +
   geom_vline(xintercept = 0, linetype = "dashed", size = 1) +
   # 1 v 4
-  geom_point(aes(x = RR_41, y = Gene_category), size = 4, color = "black") +
-  geom_errorbarh(aes(xmin = RR_41 - CI95_41, xmax = RR_41 + CI95_41, y = Gene_category), 
+  geom_point(aes(x = RR_41, y = Subcategory1), size = 4, color = "black") +
+  geom_errorbarh(aes(xmin = RR_41 - CI95_41, xmax = RR_41 + CI95_41, y = Subcategory1), 
                  color = "black") +
   # 1 v 5
-  geom_point(aes(x = RR_51, y = Gene_category), size = 4, color = "red") +
-  geom_errorbarh(aes(xmin = RR_51 - CI95_51, xmax = RR_51 + CI95_51, y = Gene_category), 
+  geom_point(aes(x = RR_51, y = Subcategory1), size = 4, color = "red") +
+  geom_errorbarh(aes(xmin = RR_51 - CI95_51, xmax = RR_51 + CI95_51, y = Subcategory1), 
                  color = "red") +
-  ggtitle("Response Ratio: Gene Categories by Visit\nBlack = Visit 4 vs Visit 1\nRed = Visit 5 vs Visit 1") +
+  ggtitle("Response Ratio: Subcategory2\nBlack = Visit 4 vs Visit 1\nRed = Visit 5 vs Visit 1") +
   ylab("Gene Category") +
   xlab("Response Ratio") +
   theme_minimal() +
@@ -106,5 +112,4 @@ geochip_RR_plot <- ggplot(data = arrange(geochip_RR, desc(RR_41))) +
     plot.title = element_text(size = 16, face = "bold")
   )
 
-
-ggsave("results/figures/Geochip_RespRatio_Visit.png", height = 10, width = 7)
+ggsave("results/figures/Geochip_RespRatio_Visit_subcategory1.png", height = 10, width = 7)
