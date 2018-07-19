@@ -123,6 +123,43 @@ data/processed/Geochip_Visit_Gene_Diff.tsv : data/processed/Merged_Geochip_Tidy.
 
 
 
+
+#######################
+### Venn Diagrams #####
+#######################
+
+
+
+
+# Venn Diagram showing the overlap in unique genes between Visits
+# Depends on:	data/processed/Merged_Geochip_Tidy.tsv
+#		data/processed/TrEAT_Clinical_Metadata_tidy.csv
+#		code/Visit_unique_gene_venndiagram.R
+# Produces:	results/figures/Visit_unique_gene_venndiagram.tiff
+results/figures/Visit_unique_gene_venndiagram.tiff : data/processed/Merged_Geochip_Tidy.tsv\
+               data/processed/TrEAT_Clinical_Metadata_tidy.csv\
+               code/Visit_unique_gene_venndiagram.R
+	R -e "source('code/Visit_unique_gene_venndiagram.R', echo=T)"
+
+
+# Venn Diagram showing the overlap in unique organisms between Visits
+# Depends on:   data/processed/Merged_Geochip_Tidy.tsv
+#               data/processed/TrEAT_Clinical_Metadata_tidy.csv
+#               code/Visit_unique_organism_venndiagram.R
+# Produces:     results/figures/Visit_unique_gene_venndiagram.tiff
+results/figures/Visit_unique_organism_venndiagram.tiff : data/processed/Merged_Geochip_Tidy.tsv\
+               data/processed/TrEAT_Clinical_Metadata_tidy.csv\
+               code/Visit_unique_organism_venndiagram.R
+	R -e "source('code/Visit_unique_organism_venndiagram.R', echo=T)"
+
+
+
+
+
+
+
+
+
 #################################
 ### Geochip Response Ratios #####
 #################################
