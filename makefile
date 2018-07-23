@@ -182,7 +182,7 @@ results/figures/Geochip_RespRatio_Visit.png : data/processed/Merged_Geochip.tsv\
 # Produces:     results/figures/Geochip_RespRatio_Visit_subcategory1.png
 results/figures/Geochip_RespRatio_Visit_subcategory1.png : data/processed/Merged_Geochip.tsv\
                                               		   code/Geochip_ResRatio_Visit_subcategory1.R
-        R -e "source('code/Geochip_ResRatio_Visit_subcategory1.R', echo=T)"
+	R -e "source('code/Geochip_ResRatio_Visit_subcategory1.R', echo=T)"
 
 
 
@@ -192,7 +192,7 @@ results/figures/Geochip_RespRatio_Visit_subcategory1.png : data/processed/Merged
 # Produces:     results/figures/Geochip_RespRatio_Visit_subcategory2.png
 results/figures/Geochip_RespRatio_Visit_subcategory2.png : data/processed/Merged_Geochip.tsv\
                                                            code/Geochip_ResRatio_Visit_subcategory2.R
-        R -e "source('code/Geochip_ResRatio_Visit_subcategory2.R', echo=T)"
+	R -e "source('code/Geochip_ResRatio_Visit_subcategory2.R', echo=T)"
 
 
 # Geochip Response Ratios for genes based on Visit Number

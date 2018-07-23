@@ -100,7 +100,7 @@ geochip_RR_plot <- ggplot(data = arrange(geochip_RR, desc(RR_41))) +
   geom_point(aes(x = RR_51, y = Subcategory1), size = 4, color = "red") +
   geom_errorbarh(aes(xmin = RR_51 - CI95_51, xmax = RR_51 + CI95_51, y = Subcategory1), 
                  color = "red") +
-  ggtitle("Response Ratio: Subcategory2\nBlack = Visit 4 vs Visit 1\nRed = Visit 5 vs Visit 1") +
+  ggtitle("Response Ratio: Subcategory1\nBlack = Visit 4 vs Visit 1\nRed = Visit 5 vs Visit 1") +
   ylab("Gene Category") +
   xlab("Response Ratio") +
   theme_minimal() +

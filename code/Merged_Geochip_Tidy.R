@@ -9,7 +9,7 @@
 library(tidyverse)
 
 # Read in merged Geochip Data
-geochip <- read_tsv("data/processed/Merged_Geochip.tsv", guess_max = 100000)
+geochip <- read_tsv("data/processed/Merged_Geochip.tsv", guess_max = 100000, progress = TRUE)
 
 # Make long/tidy
 geochip_long <- geochip %>%
@@ -26,7 +26,7 @@ ID_list <- read.csv("data/processed/ID_Decoder.csv")
 
 # Join to geochip data
 geochip_long <- geochip_long %>%
-  full_join(., ID_list, by = c("glomics_ID")) %>%
+  left_join(., ID_list, by = c("glomics_ID")) %>%
   select(glomics_ID, study_id, visit_number, everything())
 
 # Write to `data/processed`
