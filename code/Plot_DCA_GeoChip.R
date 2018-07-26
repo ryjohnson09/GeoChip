@@ -22,7 +22,7 @@ ID_list <- read.csv("data/processed/ID_Decoder.csv")
 
 # Merge subject ids into ord_DCcoords
 geochip_dca <- geochip_dca %>%
-  full_join(., ID_list, by = "glomics_ID") %>%
+  left_join(., ID_list, by = "glomics_ID") %>%
   na.omit()
 
 
@@ -33,7 +33,7 @@ geochip_dca <- geochip_dca %>%
 treatment_groups <- read_csv("data/processed/TrEAT_Clinical_Metadata_tidy.csv")
 
 geochip_dca <- geochip_dca %>%
-  full_join(., treatment_groups, by = c("study_id" = "STUDY_ID")) %>%
+  left_join(., treatment_groups, by = c("study_id" = "STUDY_ID")) %>%
   drop_na(glomics_ID)
 
 

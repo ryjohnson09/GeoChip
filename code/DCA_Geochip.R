@@ -20,13 +20,14 @@ geochip1 <- readr::read_tsv("data/processed/Merged_Geochip.tsv", progress = TRUE
 # Remove descriptive columns (leaving only samples)
 geochip1 <- geochip1 %>%
   select(-Genbank.ID, -Gene, -Organism, -Gene_category, 
-         -Subcategory1, -Subcategory2, -Lineage, -X10) # X10 was removed from study
+         -Subcategory1, -Subcategory2, -Lineage) # X10 was removed from study
 
-# Set NA's to 0
-geochip1[is.na(geochip1)] <- 0
+# Set NA's to 0 and values > 0 to 1
+geochip1v0 <- geochip1 %>%
+  mutate_all(funs(ifelse(is.na(.), 0, 1)))
 
 # Remove rows that equal 0
-geochip1 <- geochip1[rowSums(geochip1) != 0,]
+geochip1v0 <- geochip1v0[rowSums(geochip1v0) != 0,]
 
 
 
@@ -37,7 +38,7 @@ geochip1 <- geochip1[rowSums(geochip1) != 0,]
 ## Perform DCA ----------------------------------------
 
 # Detrended correspondence analysis!!!!!!!!!!
-geochip_dca <- vegan::decorana(veg = geochip1)
+geochip_dca <- vegan::decorana(veg = geochip1v0)
 
 # Get the coordinated for the samples
 geochip_dca_coords <- scores(geochip_dca, display = "species")
