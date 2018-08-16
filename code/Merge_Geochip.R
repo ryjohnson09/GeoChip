@@ -71,15 +71,15 @@ geochip_data <- geochip_data %>%
   setNames(make.names(names(.), unique = TRUE))
 
 
-#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#
-# Remove Duplicates ****MAY NEED TO BE CHANGED******* 
+#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#
+# Remove Duplicates ****Removed duplicated sample that had fewere values******* 
 geochip_data <- geochip_data %>%
   select(-X85, -X101, -X193)
 
 colnames(geochip_data) <- str_replace(string = colnames(geochip_data), 
                                       pattern = "\\.1", 
                                       replacement = "")
-#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#
+#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#
 
 
 
