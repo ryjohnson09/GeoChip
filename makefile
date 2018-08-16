@@ -65,9 +65,9 @@ data/processed/Merged_Geochip_Tidy.tsv : data/processed/Merged_Geochip.tsv\
 data/processed/TrEAT_Clinical_Metadata_tidy.csv : data/processed/Merged_Geochip.tsv\
                                                   data/raw/TrEAT_Merge_2018.06.27.XLSX\
                                                   data/raw/TrEAT_Merge_DataDictionary_2018.06.27.XLSX\
-                                                  data/raw/IDCRP_Glomics_Subject_ID_List_11-21-17.xlsx\
+                                                  data/processed/ID_Decoder.csv\
                                                   code/Create_Clin_Metadata.R
-        R -e "source('code/Create_Clin_Metadata.R', echo=T)"
+	R -e "source('code/Create_Clin_Metadata.R', echo=T)"
 
 
 
