@@ -4,7 +4,7 @@
 # Date Created: 3 Aug, 2018
 # Purpose: Extract data from the Merged TrEAT DB and compile into 
 #          clean tidy format that can be appended to data files.
-#          Tailored to the HumiChip data.
+#          Tailored to the Geochip data.
 ##################################################################
 
 library(tidyverse)
@@ -45,10 +45,10 @@ rm(treat_explain, foo)
 
 
 
-## Import Merged humichip data -----------------------------
+## Import Merged geochip data -----------------------------
 
-# Read in merged humichip data (just first instance, only need column names)
-humichip_samples <- read_tsv("data/processed/Merged_humichip.tsv", n_max = 1)
+# Read in merged geochip data (just first instance, only need column names)
+geochip_samples <- read_tsv("data/processed/Merged_Geochip.tsv", n_max = 1)
 
 
 
@@ -63,13 +63,13 @@ ID_list <- read.csv("data/processed/ID_Decoder.csv")
 
 # Filter ID_list to only include samples from Glomics Data
 ID_list <- ID_list %>%
-  filter(glomics_ID %in% colnames(humichip_samples))
+  filter(glomics_ID %in% colnames(geochip_samples))
 
 # Then, filter treat to only include samples in newly filtered ID_list
 treat <- treat %>%
   filter(STUDY_ID %in% ID_list$study_id)
 
-rm(ID_list, humichip_samples) # clean up
+rm(ID_list, geochip_samples) # clean up
 
 
 
