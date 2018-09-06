@@ -79,11 +79,6 @@ geochip_RR <- geochip %>%
   filter(!is.na(Gene_category)) %>%
   
   
-  
-  # Remove samples that are unmatched
-
-  # Remove the PLA and   
-  
   # Calculate mead, sd, and counts (n)
   group_by(Gene_category, glomics_ID, visit_number) %>%
   summarise(Gene_category_relative_abundance = sum(Signal_Relative_Abundance, na.rm = TRUE)) %>%
