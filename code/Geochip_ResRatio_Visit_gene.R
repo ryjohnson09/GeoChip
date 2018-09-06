@@ -154,6 +154,12 @@ geochip_RR_tidy <- geochip_RR_tidy %>%
 
 rm(genes_no_overlap_0)
 
+# Factor for plot
+geochip_RR_tidy$Gene <- factor(geochip_RR_tidy$Gene, 
+                            levels = rev(sort(unique(geochip_RR_tidy$Gene))))
+geochip_RR_tidy$RR_group <- factor(geochip_RR_tidy$RR_group,
+                                   levels = c("RR_51", "RR_41"))
+
 
 
 # Plot
@@ -166,7 +172,9 @@ geochip_RR_plot <- ggplot(data = geochip_RR_tidy) +
   geom_point(aes(x = Gene, y = RR, color = RR_group), size = 3, position = dodge) +
   geom_errorbar(aes(ymin = RR - CI95, ymax = RR + CI95, x = Gene, color = RR_group), position = dodge) +
   
-  scale_color_manual(values = c("black", "red"), labels = c("Visit 1 vs 4", "Visit 1 vs 5")) +
+  scale_color_manual(values = c("red", "black"), 
+                     labels = c("Visit 1 vs 5", "Visit 1 vs 4"),
+                     guide = guide_legend(reverse = TRUE)) +
   
   labs(title = "Response Ratio",
        subtitle = "Genes by Visit",
