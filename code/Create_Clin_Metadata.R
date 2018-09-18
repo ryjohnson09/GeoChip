@@ -12,8 +12,6 @@ library(readxl)
 
 ## Read in TrEAT and Clean ----------------------------------------------
 
-## Read in TrEAT and Clean ----------------------------------------------
-
 # Read in TrEAT DB
 treat <- read_excel("data/raw/TrEAT_Merge_ESBL_2018.09.13_v2.XLSX")
 
