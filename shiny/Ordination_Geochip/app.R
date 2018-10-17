@@ -1,4 +1,4 @@
-# Ordination
+# Geochip TrEAT Ordination App
 
 library(shiny)
 library(tidyverse)
@@ -51,7 +51,9 @@ color_choices <- list(
   "Treatment" = "Treatment",
   "Impact on Activity" = "Impact_of_illness_on_activity_level",
   "Past 8 hours diarrhea severity" = "LLS_severity",
-  "Alternative Categories" = "Alternative_Categories")
+  "Alternative Categories" = "Alternative_Categories",
+  "ESBL Visit 1" = "ESBL_V1",
+  "ESBL Visit 5" = "ESBL_V5")
   
 color_choices1 <- c("Fever_present_at_presentation", "Vomiting_present", 
     "Abdominal_cramps_present_at_presentation", 
