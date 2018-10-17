@@ -35,6 +35,16 @@ visit_choices <- list("Visit 1" = 1,
 
 tx_choices <- c("RIF", "LEV", "AZI", "All")
 
+phylum_choices <- geochip %>%
+  filter(str_detect(Lineage, "Bacteria")) %>%
+  filter(str_detect(Lineage, ";phylum")) %>%
+  mutate(Phylum = gsub(x = Lineage, # Phylum column
+                       pattern = ".*;phylum:(\\w*\\s*[-]*\\w*);.*", 
+                       replacement = "\\1")) %>%
+  select(Phylum) %>%
+  distinct() %>%
+  pull(Phylum)
+
 detection_choices <- c("Culture", "Taq", "Both", "Either")
 
 culture_choices <- c("All", colnames(treat)[grep(pattern = "_culture$", colnames(treat))])
@@ -122,7 +132,16 @@ ui <- fluidPage(
            wellPanel(
              # Probe Functional Category
              selectInput("Gene_category", "Probe Functional Category", 
-                         choices = Gene_category_choices, selected = "All")))),
+                         choices = Gene_category_choices, selected = "All"), br(),
+             
+             # Select Phylum probes?
+             h5("Phylum Specific Probes"),
+             checkboxInput("select_phylum", label = "Select Phylum Probes?", value = FALSE),
+             helpText("If selected, only probes from selected bacterial phlya will be included in analysis"),
+             
+             # Phyla output
+             uiOutput("phyla"),
+             helpText("Select probes based on bacterial phyla")))),
   
   
   fluidRow(
@@ -342,13 +361,51 @@ server <- function(input, output){
     }
   })
   
+  
+  ########################
+  ### Filter by Phylum ###
+  ########################
+  
+  geochip_phylum <- reactive({
+    
+    if(input$select_phylum){
+      geochip_probe() %>%
+        filter(!is.na(Lineage)) %>%
+        filter(str_detect(Lineage, "Bacteria")) %>%
+        filter(str_detect(Lineage, ";phylum")) %>%
+        mutate(Phylum = gsub(x = Lineage, # Phylum column
+                             pattern = ".*;phylum:(\\w*\\s*\\w*);.*", 
+                             replacement = "\\1")) %>%
+        filter(Phylum %in% input$phylum)
+      
+    } else if (!input$select_phylum) {
+      geochip_probe()
+    } else {
+      stopApp()
+    }
+  })
+  
+  #########################################
+  ### Render list of Phyla if applicable ##
+  #########################################
+  output$phyla <- renderUI({
+    
+    if(input$select_phylum){
+      checkboxGroupInput("phylum", "Select Phyla:",
+                         choices = phylum_choices, inline = TRUE)
+    }
+  })
+  
+  
+  
+  
   #######################
   ### Merged Geochip ###
   #######################
   
   # Filer Geochip to only include specified Visit_Number samples
    geochip_filtered <- reactive({
-     geochip1 <- geochip_probe()[,which(colnames(geochip_probe()) %in% treat_pathogen_filtered()$glomics_ID)]
+     geochip1 <- geochip_phylum()[,which(colnames(geochip_phylum()) %in% treat_pathogen_filtered()$glomics_ID)]
      
      # Set NA's to 0 and values not NA to original value
      geochip1 <- geochip1 %>%
