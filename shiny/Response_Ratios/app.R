@@ -41,8 +41,7 @@ phylum_choices <- geochip %>%
 
 cat_choices <- list("Gene Category" = "Gene_category",
                     "Subcategory 1" = "Subcategory1",
-                    "Subcategory 2" = "Subcategory2",
-                    "Phylum" = "Phylum")
+                    "Subcategory 2" = "Subcategory2")
 
 detection_choices <- c("Culture", "Taq", "Both", "Either")
 
@@ -406,7 +405,7 @@ server <- function(input, output){
       filter(!is.na(!!y_axis_cat)) %>%
       
       
-      # Calculate mead, sd, and counts (n)
+      # Calculate relative abundance
       ungroup() %>%
       group_by(!!y_axis_cat, glomics_ID, visit_number) %>%
       summarise(cat_relative_abundance = sum(Signal_Relative_Abundance, na.rm = TRUE)) %>%
