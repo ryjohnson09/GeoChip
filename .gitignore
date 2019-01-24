@@ -24,3 +24,4 @@ docs/
 shiny/*/*
 !shiny/*/app.R
 
+.Rproj.user
