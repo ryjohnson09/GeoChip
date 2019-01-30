@@ -355,6 +355,15 @@ shinyServer(function(input, output){
         geom_point(aes_string(x = "PC1", y = "PC2", color = my_fill()),
                    pch = 19, alpha = 0.8, size = point_size) +
         ggtitle("PCA Analysis")
+      
+      # Connect lines?
+      if (input$lines == "Yes"){
+        geo_ord_plot <- geo_ord_plot + 
+          geom_line(aes_string(x = "PC1", y = "PC2", group = "study_id"), linetype = 1, color = "black", size = 0.8)
+      } else {
+        geo_ord_plot <- geo_ord_plot
+      }
+      # Plot
       ggMarginal(geo_ord_plot, groupColour = TRUE, groupFill = TRUE)
       
       #################
@@ -369,6 +378,15 @@ shinyServer(function(input, output){
         geom_point(aes_string(x = "Axis.1", y = "Axis.2", color = my_fill()),
                    pch = 19, alpha = 0.8, size = point_size) +
         ggtitle("PCoA Analysis")
+      
+      # Connect lines?
+      if (input$lines == "Yes"){
+        geo_ord_plot <- geo_ord_plot + 
+          geom_line(aes_string(x = "Axis.1", y = "Axis.2", group = "study_id"), linetype = 1, color = "black", size = 0.8)
+      } else {
+        geo_ord_plot <- geo_ord_plot
+      }
+      # Plot
       ggMarginal(geo_ord_plot, groupColour = TRUE, groupFill = TRUE)
       
       ################
@@ -383,6 +401,15 @@ shinyServer(function(input, output){
         geom_point(aes_string(x = "DCA1", y = "DCA2", color = my_fill()),
                    pch = 19, alpha = 0.8, size = point_size) +
         ggtitle("DCA Analysis")
+      
+      # Connect lines?
+      if (input$lines == "Yes"){
+        geo_ord_plot <- geo_ord_plot + 
+          geom_line(aes_string(x = "DCA1", y = "DCA2", group = "study_id"), linetype = 1, color = "black", size = 0.8)
+      } else {
+        geo_ord_plot <- geo_ord_plot
+      }
+      # Plot
       ggMarginal(geo_ord_plot, groupColour = TRUE, groupFill = TRUE)
       
     } else {stopApp("Error generating plot")} 
