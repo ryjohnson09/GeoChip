@@ -201,10 +201,213 @@ shinyServer(function(input, output){
   })
   
   
+  ## Filter patients from Geochip Data -----------___---------------------------
+  geo_probes_patient_filtered <- eventReactive(input$action, {
+    geo_probes_filtered() %>%
+      select_if(colnames(.) %in% c("Genbank.ID", "Gene", "Organism", "Lineage",
+                                   "Gene_category", "Subcategory1",
+                                   "Subcategory2", ID_v_c_t_d_p()$glomics_ID))
+  })
+  
+  
+  ## Prepare Data for Ordination Analysis ----------------------------------------
+  geo_matrix <- eventReactive(input$action, {
+    
+    validate(need(ncol(geo_probes_patient_filtered()) > 7, "No Patients meet criteria"))
+    
+    # Set NA's to 0 and values not NA to original value
+    geo1 <- geo_probes_patient_filtered() %>%
+      select_if(colnames(.) %in% ID_v_c_t_d_p()$glomics_ID) %>%
+      mutate_all(funs(ifelse(is.na(.), 0, .)))
+    
+    # Remove rows that equal 0
+    geo1 <- geo1[rowSums(geo1) != 0,]
+    
+    # Return matrix
+    as.matrix(geo1)
+  })
+  
+  
+  ## Ordination Analysis ----------------------------------------------------------
+  geo_ordination_results <- eventReactive(input$action, {
+    withProgress(message = "Performing Ordination: ", {
+      
+      # Perform PCA analysis using vegan
+      if(input$ordination == "PCA"){
+        incProgress(amount = 1/2, detail = "PCA analysis")
+        geo_PCA <- vegan::rda(t(geo_matrix()))
+        # Perform PCoA analysis using ape 
+      } else if (input$ordination == "PCoA"){
+        incProgress(amount = 1/3, detail = "Calculating distance matrix")
+        geochip_dist <- vegan::vegdist(as.matrix(t(geo_matrix())))
+        incProgress(amount = 1/3, detail = "PCoA analysis")
+        ape::pcoa(geochip_dist, correction = "none")
+        # Perform DCA analysis using vegan
+      } else if (input$ordination == "DCA"){
+        incProgress(amount = 1/2, detail = "DCA analysis")
+        vegan::decorana(t(geo_matrix()))
+      } else {
+        stopApp("Error in running ordination")
+      }
+    })
+  })
+  
+  
+  # Extract coordinates as tibble
+  geo_coordinates <- eventReactive(input$action, {
+    
+    # PCA or DCA
+    if (input$ordination == "PCA" | input$ordination == "DCA"){
+      as.data.frame(scores(geo_ordination_results(), display = "sites")) %>%
+        rownames_to_column(var = "glomics_ID")
+      # If PCoA
+    } else if (input$ordination == "PCoA"){
+      as.data.frame(geo_ordination_results()$vectors[,1:2]) %>%
+        rownames_to_column(var = "glomics_ID")
+    } else {
+      stopApp("Error in extracting ordination coordinates")
+    }
+  })
+  
+  
+  
+  # Get Proportion explained
+  ord_prop_expl <- eventReactive(input$action, {
+    if (input$ordination == "PCA"){
+      summary(eigenvals(geo_ordination_results()))[2,] * 100
+    } else if (input$ordination == "PCoA"){
+      geo_ordination_results()$values$Relative_eig * 100
+    } else {
+      stopApp("Error in extraction percent explaind by axes")
+    }
+  })
   
   
   
   
+  ## Merge Ordination Analysis with Metadata --------------------------------------
+  geo_ordination_metadata <- eventReactive(input$action, {
+    geo_coordinates() %>%
+      # Add study ID's
+      full_join(., ID_v_c_t_d_p(), by = "glomics_ID") %>%
+      # Add in pathogen list from treat_pathogen()
+      left_join(., treat_pathogens(), by = c("study_id" = "STUDY_ID")) %>%
+      # Add in remaining treat metadata
+      left_join(., treat, by = c("study_id" = "STUDY_ID")) %>%
+      
+      # Factor Columns
+      mutate(visit_number = factor(visit_number)) %>%
+      mutate(Impact_of_illness_on_activity_level = factor(Impact_of_illness_on_activity_level))
+  })
   
+  
+  
+  ## Plot --------------------------------------------------------------
+  # Aesthetic sizes
+  axis_title_size <- 18
+  axis_text_size <- 16
+  title_size <- 20
+  legend_text_size <- 13
+  point_size <- 4
+  
+  # Fill
+  my_fill <- reactive({
+    ifelse(input$point_color == "None", "NULL", input$point_color)
+  })
+  
+  
+  # Set up Base Plot
+  geo_ord_base_plot <- reactive({
+    
+    ggplot(geo_ordination_metadata()) +
+      theme_minimal() +
+      theme(
+        axis.title.x = element_text(size = axis_title_size),
+        axis.text.x = element_text(size = axis_text_size, hjust = 1),
+        axis.text.y = element_text(size = axis_text_size),
+        axis.title.y = element_text(size = axis_title_size),
+        plot.title = element_text(size = title_size, face = "bold"),
+        legend.text = element_text(size = legend_text_size),
+        legend.title = element_blank()) +
+      guides(fill = guide_legend(override.aes = list(size=7)))
+  })
+  
+  # eventReactive to chose plot type
+  plot_type <- eventReactive(input$action, {
+    ifelse(input$ordination == "PCA", "PCA",
+           ifelse(input$ordination == "DCA", "DCA", "PCoA"))
+  })
+  
+  
+  
+  plotInput <- reactive({
+    
+    
+    ################
+    ### PCA PLOT ###
+    ################
+    if (plot_type() == "PCA"){
+      geo_ord_plot <- geo_ord_base_plot() +
+        xlab(paste0("PC1(", round(ord_prop_expl()[[1]], 2), "%)")) +
+        ylab(paste0("PC2(", round(ord_prop_expl()[[2]], 2), "%)")) +
+        geom_point(aes_string(x = "PC1", y = "PC2", color = my_fill()),
+                   pch = 1, alpha = 1, size = point_size) +
+        geom_point(aes_string(x = "PC1", y = "PC2", color = my_fill()),
+                   pch = 19, alpha = 0.8, size = point_size) +
+        ggtitle("PCA Analysis")
+      ggMarginal(geo_ord_plot, groupColour = TRUE, groupFill = TRUE)
+      
+      #################
+      ### PCoA PLOT ###
+      #################
+    } else if (plot_type() == "PCoA"){
+      geo_ord_plot <- geo_ord_base_plot() +
+        xlab(paste0("PCoA1(", round(ord_prop_expl()[[1]], 2), "%)")) +
+        ylab(paste0("PCoA2(", round(ord_prop_expl()[[2]], 2), "%)")) +
+        geom_point(aes_string(x = "Axis.1", y = "Axis.2", color = my_fill()),
+                   pch = 1, alpha = 1, size = point_size) +
+        geom_point(aes_string(x = "Axis.1", y = "Axis.2", color = my_fill()),
+                   pch = 19, alpha = 0.8, size = point_size) +
+        ggtitle("PCoA Analysis")
+      ggMarginal(geo_ord_plot, groupColour = TRUE, groupFill = TRUE)
+      
+      ################
+      ### DCA PLOT ###
+      ################
+    } else if (plot_type() == "DCA"){
+      geo_ord_plot <- geo_ord_base_plot() +
+        xlab("DCA1") +
+        ylab("DCA2") +
+        geom_point(aes_string(x = "DCA1", y = "DCA2", color = my_fill()),
+                   pch = 1, alpha = 1, size = point_size) +
+        geom_point(aes_string(x = "DCA1", y = "DCA2", color = my_fill()),
+                   pch = 19, alpha = 0.8, size = point_size) +
+        ggtitle("DCA Analysis")
+      ggMarginal(geo_ord_plot, groupColour = TRUE, groupFill = TRUE)
+      
+    } else {stopApp("Error generating plot")} 
+  })
+  
+  
+  
+  ## Display Plot ---------------------------------------------------
+  output$geo_plot <- renderPlot({
+    print(plotInput())
+  })
+  
+  ## Download plot --------------------------------------------------
+  output$downloadPlot <- downloadHandler(
+    filename = function(){paste("shiny_plot",'.png',sep='')},
+    content = function(file){
+      ggsave(file, plot=plotInput(), width = 10, height = 9)
+    })
+  
+  
+  ## Show Table ----------------------------------------------------
+  output$geo_table <- renderTable({geo_ordination_metadata()})
+  
+  output$random_text <- renderText({ 
+    paste(ncol(geo_probes_patient_filtered()), " columns")
+  })
   
 })
