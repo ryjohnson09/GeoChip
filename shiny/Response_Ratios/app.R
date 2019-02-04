@@ -7,7 +7,7 @@ library(tidyverse)
 #### Read in Files ####
 #######################
 
-ID_decoder <- suppressWarnings(suppressMessages(read_csv("ID_Decoder.csv")))
+ID_decoder <- suppressWarnings(suppressMessages(read_csv("ID_Decoder_Geochip.csv")))
 treat <- suppressWarnings(suppressMessages(read_csv("TrEAT_Clinical_Metadata_tidy.csv")))
 geochip <- suppressWarnings(suppressMessages(read_tsv("Merged_Geochip.tsv")))
 
@@ -116,7 +116,11 @@ ui <- fluidPage(
                  
                  # Phyla output
                  uiOutput("phyla"),
-                 helpText("Select probes based on bacterial phyla")))),
+                 helpText("Select probes based on bacterial phyla"),
+                 
+                 # Should signal intensity be converted to 0 and 1
+                 checkboxInput("signal", "Convert probe signal to 0 or 1?", value = FALSE)
+                 ))),
       
       ########################
       ### Y axis categories ##
@@ -137,7 +141,7 @@ ui <- fluidPage(
       
       
       fluidRow(
-        h3("Ordination and Aesthetics"),
+        h3("Aesthetics"),
         
         column(12, 
                wellPanel(
@@ -356,13 +360,14 @@ server <- function(input, output){
   })
   
   
+  
   ############################################
   ### Filter geochip for certain patients ###
   ### And Make Long ##########################
   ############################################
   
   
-  geochip_final <- reactive({
+  geochip_long <- reactive({
     # Subset Samples based on treat_pathogen_filtered
     geochip_phylum() %>%
       select_if(colnames(.) %in% c("Genbank.ID", "Gene", "Organism", "Lineage",
@@ -380,6 +385,20 @@ server <- function(input, output){
       left_join(., ID_decoder, by = c("glomics_ID")) %>%
       select(glomics_ID, study_id, visit_number, everything())
     
+  })
+  
+  #######################################
+  ### Rel Abundance by probe presence ###
+  ### or probe signal ############### ###
+  #######################################
+  
+  geochip_final <- reactive({
+    if (input$signal){
+      geochip_long() %>%
+        mutate(Signal = ifelse(is.na(Signal), 0, 1))
+    } else {
+      geochip_long()
+    }
   })
   
   #################################
