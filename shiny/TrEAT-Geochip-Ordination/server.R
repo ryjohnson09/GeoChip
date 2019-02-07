@@ -185,6 +185,60 @@ shinyServer(function(input, output){
   })
   
   
+  #####################################
+  ### Filter for patients with ESBL ###
+  #####################################
+  treat_esbls <- reactive({
+    
+    # Create tibble of just ESBL columns and modify
+    treat_esbl_select <- treat %>% 
+      # Select columns of interest
+      select(STUDY_ID, ESBL_V1, ESBL_V5, ends_with("either_V1"), ends_with("either_V5")) %>%
+      # Change ESBL columns to Yes/No
+      mutate_at(vars(starts_with("ESBL")), funs(ifelse(. == "Positive", "Yes",
+                                                       ifelse(. == "Negative", "No", NA)))) %>% 
+      # Replace yes no with ESBL
+      mutate_at(vars(-STUDY_ID),
+                funs(ifelse(. == "Yes", deparse(substitute(.)), ""))) %>% 
+      # If no ESBLs of interest detected, remove it
+      mutate(esbl_present = rowSums(. != "", na.rm = TRUE)) %>%
+      filter(esbl_present > 1) %>%
+      select(-esbl_present) %>% 
+      # Merge pathogens into one column
+      unite(all_esbls, -STUDY_ID, sep = ":") %>%
+      mutate(all_esbls = str_replace_all(all_esbls, "NA", "")) %>% 
+      mutate(all_esbls = str_replace_all(all_esbls, "^:*", "")) %>%
+      mutate(all_esbls = str_replace_all(all_esbls, ":*$", "")) %>%
+      mutate(all_esbls = str_replace_all(all_esbls, ":+", "; "))
+    
+    # Select for ESBL of interest
+    treat_esbl <- treat_esbl_select %>%
+      rowwise() %>% 
+      # change if you want to select if contain ALL ESBL selected
+      # or select if contain ANY ESBL selected
+      #filter(all(str_detect(all_esbls, input$esbls))) %>% # all
+      filter(str_detect(all_esbls, paste(input$esbls, collapse = "|"))) %>% 
+      # remove either from column
+      mutate(all_esbls = str_replace_all(string = all_esbls, pattern = "_either", replacement = ""))
+    
+    treat_esbl
+  })
+  
+  # Filter ID if selecting ESBLs
+  ID_v_c_t_d_p_e <- reactive({
+    if (input$esbl_select){
+      
+      # Ensure that at least one pathogen is selected
+      validate(need(input$esbls, 'Please select at least one ESBL'))
+      
+      ID_v_c_t_d_p() %>%
+        filter(study_id %in% treat_esbls()$STUDY_ID)
+    } else if (!input$pathogen_select){
+      ID_v_c_t_d_p()
+    }
+  })
+  
+  
   
   ## Probe Filtering ---------------------------------------------------------
   geo_probes_filtered <- reactive({
@@ -206,7 +260,7 @@ shinyServer(function(input, output){
     geo_probes_filtered() %>%
       select_if(colnames(.) %in% c("Genbank.ID", "Gene", "Organism", "Lineage",
                                    "Gene_category", "Subcategory1",
-                                   "Subcategory2", ID_v_c_t_d_p()$glomics_ID))
+                                   "Subcategory2", ID_v_c_t_d_p_e()$glomics_ID))
   })
   
   
@@ -217,7 +271,7 @@ shinyServer(function(input, output){
     
     # Set NA's to 0 and values not NA to original value
     geo1 <- geo_probes_patient_filtered() %>%
-      select_if(colnames(.) %in% ID_v_c_t_d_p()$glomics_ID) %>%
+      select_if(colnames(.) %in% ID_v_c_t_d_p_e()$glomics_ID) %>%
       mutate_all(funs(ifelse(is.na(.), 0, .)))
     
     # Remove rows that equal 0
@@ -289,9 +343,11 @@ shinyServer(function(input, output){
   geo_ordination_metadata <- eventReactive(input$action, {
     geo_coordinates() %>%
       # Add study ID's
-      full_join(., ID_v_c_t_d_p(), by = "glomics_ID") %>%
+      full_join(., ID_v_c_t_d_p_e(), by = "glomics_ID") %>%
       # Add in pathogen list from treat_pathogen()
       left_join(., treat_pathogens(), by = c("study_id" = "STUDY_ID")) %>%
+      # Add in ESBL list from treat_esbl()
+      left_join(., treat_esbls(), by = c("study_id" = "STUDY_ID")) %>% 
       # Add in remaining treat metadata
       left_join(., treat, by = c("study_id" = "STUDY_ID")) %>%
       
