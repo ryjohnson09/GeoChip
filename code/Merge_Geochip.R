@@ -32,13 +32,27 @@ for (gchip in geochip_files){
   if(is_empty(geochip_data)){
     
     # Read in gchip
-    geochip_data <- read_tsv(gchip, guess_max = 100000) %>%
+    geochip_data <- read_tsv(gchip, col_types = cols(`Genbank ID` = col_character(),
+                                                     Gene = col_character(),
+                                                     Organism = col_character(),
+                                                     Lineage = col_character(),
+                                                     Gene_category = col_character(),
+                                                     Subcategory1 = col_character(),
+                                                     Subcategory2 = col_character(),
+                                                     .default = col_double())) %>%
       select(`Genbank ID`, Gene, Organism, Gene_category, 
              Subcategory1, Subcategory2, Lineage, starts_with("X"))
   } else {
     
     # Read in gchip and merge into geochip_data
-    geochip_temp <-  read_tsv(gchip, guess_max = 100000) %>%
+    geochip_temp <-  read_tsv(gchip, col_types = cols(`Genbank ID` = col_character(),
+                                                      Gene = col_character(),
+                                                      Organism = col_character(),
+                                                      Lineage = col_character(),
+                                                       Gene_category = col_character(),
+                                                      Subcategory1 = col_character(),
+                                                      Subcategory2 = col_character(),
+                                                      .default = col_double())) %>%
       select(`Genbank ID`, Gene, Organism, Gene_category, 
              Subcategory1, Subcategory2, Lineage, starts_with("X"))
     
@@ -50,6 +64,18 @@ for (gchip in geochip_files){
 
 # Clean
 rm(geochip_temp, gchip, geochip_files)
+
+
+# Make sure each probe has a unique identifier. Using Genbank ID
+# Check that the Genbank ID column has no duplicates
+ensure_no_dups <- sum(duplicated(geochip_data$`Genbank ID`) + 
+                        duplicated(geochip_data$`Genbank ID`, fromLast = TRUE))
+
+# Stop execution if duplicates found
+if(ensure_no_dups != 0){
+  stop("Non unique probe identifiers!")
+}
+
 
 
 # Remove any extraneous text at end of sample headers
