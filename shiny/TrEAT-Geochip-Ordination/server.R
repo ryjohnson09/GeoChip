@@ -486,6 +486,70 @@ shinyServer(function(input, output){
     })
   
   
+  ## Perform Statistics ----------------------------------------------
+  stats_groups <- reactive({
+    if (input$stat_calc){
+      paste("Groupings:", paste(unique(geo_ordination_metadata()[[input$point_color]]), collapse = ", "))
+    } 
+  })
+  
+  adonis_results <- reactive({
+    # Ensure that geo_ordination_metadata$glomics_ID is in the
+    #  same order as colnames(geo_matrix())
+    if (!all(geo_ordination_metadata()$glomics_ID == colnames(geo_matrix()))){
+      stopApp("Error calculating adonis P-value")
+    }
+    
+    if (input$stat_calc){
+      
+      # Calculate adonis results
+      withProgress(message = "Performing adonis test: ", value = 0.33, {
+        adonis_temp <-  vegan::adonis(t(geo_matrix()) ~ geo_ordination_metadata()[[input$point_color]], 
+                                      method = "bray", 
+                                      perm = 99)
+      })
+      
+      paste("adonis p-value: ", adonis_temp$aov.tab$`Pr(>F)`[1])
+    } 
+  })
+  
+  
+  mrpp_results <- reactive({
+    # Ensure that geo_ordination_metadata$glomics_ID is in the
+    #  same order as colnames(geo_matrix())
+    if (!all(geo_ordination_metadata()$glomics_ID == colnames(geo_matrix()))){
+      stopApp("Error calculating mrpp P-value")
+    } 
+    
+    if (input$stat_calc){
+      
+      # Calculate mrpp results
+      withProgress(message = "Performing mrpp test: ", value = 0.66, {
+        mrpp_temp <-  vegan::mrpp(t(geo_matrix()), 
+                                  geo_ordination_metadata()[[input$point_color]])
+      })
+      
+      paste("mrpp p-value: ", mrpp_temp$Pvalue)
+    } 
+  })
+  
+  
+  ## Print stats --------------------------------------------------
+  
+  output$stats_groupings <- renderText({
+    stats_groups()
+  })
+  
+  output$adonis_pvalue <- renderText({
+    adonis_results()
+  })
+  
+  output$mrpp_pvalue <- renderText({
+    mrpp_results()
+  })
+  
+  
+  
   ## Show Table ----------------------------------------------------
   output$geo_table <- renderTable({geo_ordination_metadata()})
   

@@ -148,7 +148,13 @@ shinyUI(fluidPage(
                       ### Connect Points ###
                       ######################
                       radioButtons("lines", "Connect points by study ID?", 
-                                   choices = c("Yes", "No"), selected = "No")
+                                   choices = c("Yes", "No"), selected = "No"),
+                      
+                      #####################
+                      ### Perform Stats ###
+                      #####################
+                      checkboxInput("stat_calc", "Perform adonis & mrpp tests on colored groups?", 
+                                    value = FALSE)
       )),
       
       
@@ -167,7 +173,11 @@ shinyUI(fluidPage(
     mainPanel(
       plotOutput("geo_plot", width = "800px", height = "800px"),
       br(),
-      textOutput("random_text"),
+      verbatimTextOutput("stats_groupings"),
+      br(),
+      verbatimTextOutput("adonis_pvalue"),
+      br(),
+      verbatimTextOutput("mrpp_pvalue"),
       br(),
       fluidRow(column(12,tableOutput("geo_table")))
     ))))
